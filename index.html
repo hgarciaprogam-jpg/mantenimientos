@@ -110,24 +110,65 @@
         let rep=[];let pht=[];const P='E-gl0bal25+';
         window.onload=function(){const s=localStorage.getItem('r');if(s)rep=JSON.parse(s);document.getElementById('date').valueAsDate=new Date();['loc','iss','obs','eloc','eiss','eobs'].forEach(function(i){document.getElementById(i).oninput=function(e){e.target.value=e.target.value.toUpperCase()};});document.getElementById('ph').onchange=function(e){Array.from(e.target.files).forEach(function(f){const r=new FileReader();r.onload=function(v){pht.push(v.target.result);up()};r.readAsDataURL(f)})};ui()};
         function up(){const d=document.getElementById('prev');d.innerHTML='';pht.forEach(function(p,i){const v=document.createElement('div');v.className='relative';v.innerHTML='<img src="'+p+'" class="w-full h-20 object-cover rounded border-2"><button onclick="pht.splice('+i+',1);up()" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 font-bold">×</button>';d.appendChild(v)})}
-        function submit(){const t=document.getElementById('tech').value;const d=document.getElementById('date').value;const l=document.getElementById('loc').value;const i=document.getElementById('iss').value;const o=document.getElementById('obs').value;const s=document.querySelector('input[name="st"]:checked').value;if(!t||!d||!l||!i){alert('⚠️ Completa los campos obligatorios');return}rep.push({id:Date.now(),order:rep.length,tech:t,date:d,loc:l,iss:i,obs:o,stat:s,photos:pht.slice(),status:'pending',time:new Date().toISOString()});localStorage.setItem('r',JSON.stringify(rep));document.getElementById('loc').value='';document.getElementById('iss').value='';document.getElementById('obs').value='';document.getElementById('ph').value='';document.getElementById('prev').innerHTML='';pht=[];ui();// Enviar datos a Google Sheets
-fetch("https://script.google.com/macros/s/AKfycbwnLQZy_vk2JftbS820IkPhlpLyJEK9NLB9u2PH2QUXxKw5oqJjPdPbSiF6D1k9ZOYxTg/exec", {
-  method: "POST",
-  mode: "no-cors",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
+    function submit(){
+  const t=document.getElementById('tech').value;
+  const d=document.getElementById('date').value;
+  const l=document.getElementById('loc').value;
+  const i=document.getElementById('iss').value;
+  const o=document.getElementById('obs').value;
+  const s=document.querySelector('input[name="st"]:checked').value;
+
+  if(!t||!d||!l||!i){
+    alert('⚠️ Completa los campos obligatorios');
+    return;
+  }
+
+  rep.push({
+    id: Date.now(),
+    order: rep.length,
     tech: t,
     date: d,
     loc: l,
     iss: i,
     obs: o,
     stat: s,
-    photo: pht.length > 0 ? pht[0] : ""
-  })
-});
-alert('✅ Registrado')}
+    photos: pht.slice(),
+    status: 'pending',
+    time: new Date().toISOString()
+  });
+
+  localStorage.setItem('r', JSON.stringify(rep));
+
+  // 👇 Enviar datos a Google Sheets (ANTES de limpiar)
+  fetch("https://script.google.com/macros/s/AKfycbwnLQZy_vk2JftbS820IkPhlpLyJEK9NLB9u2PH2QUXxKw5oqJjPdPbSiF6D1k9ZOYxTg/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      tech: t,
+      date: d,
+      loc: l,
+      iss: i,
+      obs: o,
+      stat: s,
+      photo: pht.length > 0 ? pht[0] : ""
+    })
+  });
+
+  // 👇 Ahora sí limpiar los campos
+  document.getElementById('loc').value = '';
+  document.getElementById('iss').value = '';
+  document.getElementById('obs').value = '';
+  document.getElementById('ph').value = '';
+  document.getElementById('prev').innerHTML = '';
+  pht = [];
+
+  ui();
+  alert('✅ Registrado');
+}
+
         function fmt(d){const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
         function app(id){const r=rep.find(function(x){return x.id===id});if(r){r.status='approved';localStorage.setItem('r',JSON.stringify(rep));ui()}}
         function del(id){if(confirm('¿Eliminar?')){rep=rep.filter(function(x){return x.id!==id});localStorage.setItem('r',JSON.stringify(rep));ui()}}

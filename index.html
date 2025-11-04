@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFORME DE EQUIPOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="p-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6 border-l-4 border-blue-600">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">📋 SISTEMA DE GESTIÓN DE MANTENIMIENTOS</h1>
+                <p class="text-gray-600 mb-4">Control y seguimiento de novedades por equipo</p>
+                <div class="flex gap-3">
+                    <button onclick="showView('form')" id="btnForm" class="px-6 py-3 rounded-lg font-bold transition bg-blue-600 text-white">➕ REGISTRAR</button>
+                    <button onclick="checkAdmin()" id="btnAdmin" class="px-6 py-3 rounded-lg font-bold transition bg-gray-200 text-gray-700">🔐 ADMIN (<span id="pc">0</span>)</button>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div id="formView" class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">Registrar Nueva Novedad</h2>
+                <div class="space-y-4">
+                    <select id="tech" class="w-full p-3 border-2 rounded-lg font-semibold">
+                        <option value="">-- SELECCIONA TÉCNICO --</option>
+                        <option>EDISON BOLIVAR</option><option>OMAR RESTREPO</option><option>LISANDRO BETANCUR</option>
+                        <option>GABRIEL GARCÍA</option><option>ALEJANDRO MONCADA</option><option>DANIEL ESTEBAN</option>
+                        <option>ELENA VASQUEZ</option><option>FABIAN MENESES</option><option>JHONATAN MOISES</option>
+                    </select>
+                    <input type="date" id="date" class="w-full p-3 border-2 rounded-lg">
+                    <input type="text" id="loc" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="UBICACIÓN / EQUIPO">
+                    <textarea id="iss" rows="4" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="DESCRIPCIÓN DE LA NOVEDAD"></textarea>
+                    <textarea id="obs" rows="2" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="OBSERVACIONES (OPCIONAL)"></textarea>
+                    <div class="flex gap-4">
+                        <label class="flex-1 flex items-center gap-2 p-3 bg-green-50 border-2 border-green-300 rounded-lg cursor-pointer hover:bg-green-100">
+                            <input type="radio" name="st" value="OPERATIVO" checked class="w-5 h-5"><span class="font-bold text-green-700">✅ OPERATIVO</span>
+                        </label>
+                        <label class="flex-1 flex items-center gap-2 p-3 bg-red-50 border-2 border-red-300 rounded-lg cursor-pointer hover:bg-red-100">
+                            <input type="radio" name="st" value="INOPERATIVO" class="w-5 h-5"><span class="font-bold text-red-700">❌ INOPERATIVO</span>
+                        </label>
+                    </div>
+                    <input type="file" id="ph" accept="image/*" multiple class="w-full p-3 border-2 border-dashed rounded-lg">
+                    <div id="prev" class="grid grid-cols-3 gap-2"></div>
+                    <button onclick="submit()" class="w-full bg-blue-600 text-white p-4 rounded-lg font-bold text-lg hover:bg-blue-700">💾 REGISTRAR NOVEDAD</button>
+                </div>
+            </div>
+
+            <!-- Admin -->
+            <div id="adminView" class="hidden space-y-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-orange-500 text-white rounded-lg shadow-lg p-6">
+                        <p class="text-sm opacity-90">PENDIENTES</p>
+                        <p class="text-4xl font-bold mt-2" id="pc2">0</p>
+                    </div>
+                    <div class="bg-green-500 text-white rounded-lg shadow-lg p-6">
+                        <p class="text-sm opacity-90">APROBADAS</p>
+                        <p class="text-4xl font-bold mt-2" id="ac">0</p>
+                    </div>
+                    <div class="bg-blue-500 text-white rounded-lg shadow-lg p-6">
+                        <p class="text-sm opacity-90">TOTAL</p>
+                        <p class="text-4xl font-bold mt-2" id="tc">0</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <button onclick="clear()" class="w-full bg-orange-500 text-white p-3 rounded-lg font-bold hover:bg-orange-600">🗑️ LIMPIAR APROBADAS (<span id="ac2">0</span>)</button>
+                </div>
+
+                <!-- Pending -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-600">⏳ PENDIENTES DE REVISIÓN</h2>
+                    <div id="pend"></div>
+                </div>
+
+                <!-- Approved -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-green-600">✅ APROBADAS</h2>
+                    <div id="appr"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full">
+            <div class="bg-blue-600 p-4 rounded-t-lg"><h3 class="text-xl font-bold text-white">✏️ EDITAR NOVEDAD</h3></div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="eid">
+                <input type="text" id="eloc" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="UBICACIÓN">
+                <textarea id="eiss" rows="4" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="NOVEDAD"></textarea>
+                <textarea id="eobs" rows="2" class="w-full p-3 border-2 rounded-lg uppercase" placeholder="OBSERVACIONES"></textarea>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2"><input type="radio" name="est" value="OPERATIVO"> OPERATIVO</label>
+                    <label class="flex items-center gap-2"><input type="radio" name="est" value="INOPERATIVO"> INOPERATIVO</label>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="save()" class="flex-1 bg-blue-600 text-white p-3 rounded-lg font-bold">💾 GUARDAR</button>
+                    <button onclick="close()" class="flex-1 bg-gray-300 p-3 rounded-lg font-bold">❌ CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rep=[];let pht=[];const P='E-gl0bal25+';
+        window.onload=function(){const s=localStorage.getItem('r');if(s)rep=JSON.parse(s);document.getElementById('date').valueAsDate=new Date();['loc','iss','obs','eloc','eiss','eobs'].forEach(function(i){document.getElementById(i).oninput=function(e){e.target.value=e.target.value.toUpperCase()};});document.getElementById('ph').onchange=function(e){Array.from(e.target.files).forEach(function(f){const r=new FileReader();r.onload=function(v){pht.push(v.target.result);up()};r.readAsDataURL(f)})};ui()};
+        function up(){const d=document.getElementById('prev');d.innerHTML='';pht.forEach(function(p,i){const v=document.createElement('div');v.className='relative';v.innerHTML='<img src="'+p+'" class="w-full h-20 object-cover rounded border-2"><button onclick="pht.splice('+i+',1);up()" class="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 font-bold">×</button>';d.appendChild(v)})}
+        function submit(){const t=document.getElementById('tech').value;const d=document.getElementById('date').value;const l=document.getElementById('loc').value;const i=document.getElementById('iss').value;const o=document.getElementById('obs').value;const s=document.querySelector('input[name="st"]:checked').value;if(!t||!d||!l||!i){alert('⚠️ Completa los campos obligatorios');return}rep.push({id:Date.now(),order:rep.length,tech:t,date:d,loc:l,iss:i,obs:o,stat:s,photos:pht.slice(),status:'pending',time:new Date().toISOString()});localStorage.setItem('r',JSON.stringify(rep));document.getElementById('loc').value='';document.getElementById('iss').value='';document.getElementById('obs').value='';document.getElementById('ph').value='';document.getElementById('prev').innerHTML='';pht=[];ui();alert('✅ Registrado')}
+        function fmt(d){const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+        function app(id){const r=rep.find(function(x){return x.id===id});if(r){r.status='approved';localStorage.setItem('r',JSON.stringify(rep));ui()}}
+        function del(id){if(confirm('¿Eliminar?')){rep=rep.filter(function(x){return x.id!==id});localStorage.setItem('r',JSON.stringify(rep));ui()}}
+        function edit(id){const r=rep.find(function(x){return x.id===id});if(!r)return;document.getElementById('eid').value=r.id;document.getElementById('eloc').value=r.loc;document.getElementById('eiss').value=r.iss;document.getElementById('eobs').value=r.obs||'';const rad=document.getElementsByName('est');for(let i=0;i<rad.length;i++){if(rad[i].value===r.stat)rad[i].checked=true}document.getElementById('modal').classList.remove('hidden')}
+        function close(){document.getElementById('modal').classList.add('hidden')}
+        function save(){const id=parseInt(document.getElementById('eid').value);const r=rep.find(function(x){return x.id===id});if(r){r.loc=document.getElementById('eloc').value;r.iss=document.getElementById('eiss').value;r.obs=document.getElementById('eobs').value;r.stat=document.querySelector('input[name="est"]:checked').value;localStorage.setItem('r',JSON.stringify(rep));ui();close();alert('✅ Guardado')}}
+        function clear(){const c=rep.filter(function(x){return x.status==='approved'}).length;if(c===0){alert('No hay aprobadas');return}if(confirm('¿Eliminar '+c+' aprobadas?')){rep=rep.filter(function(x){return x.status!=='approved'});localStorage.setItem('r',JSON.stringify(rep));ui();alert('✅ Eliminadas')}}
+        function showView(v){document.getElementById('formView').classList.toggle('hidden',v!=='form');document.getElementById('adminView').classList.toggle('hidden',v!=='admin');document.getElementById('btnForm').className='px-6 py-3 rounded-lg font-bold transition '+(v==='form'?'bg-blue-600 text-white':'bg-gray-200 text-gray-700');document.getElementById('btnAdmin').className='px-6 py-3 rounded-lg font-bold transition '+(v==='admin'?'bg-blue-600 text-white':'bg-gray-200 text-gray-700')}
+        function checkAdmin(){const p=prompt('🔐 Contraseña:');if(p===P)showView('admin');else if(p!==null)alert('❌ Incorrecta')}
+        function viewPh(id){const r=rep.find(function(x){return x.id===id});if(!r||!r.photos.length)return;let h='<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;padding:20px;overflow:auto"><div style="max-width:1200px;margin:0 auto"><button onclick="this.parentElement.parentElement.remove()" style="background:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;float:right;font-weight:bold">✕ CERRAR</button><h2 style="color:white;margin:20px 0;font-size:24px">📷 '+r.loc+' - '+fmt(r.date)+'</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">';r.photos.forEach(function(p,i){h+='<div style="background:white;padding:12px;border-radius:8px"><img src="'+p+'" style="width:100%;border-radius:6px;margin-bottom:10px"><a href="'+p+'" download="'+r.loc+'_'+(i+1)+'.jpg" style="display:block;background:#2563eb;color:white;text-align:center;padding:10px;border-radius:6px;text-decoration:none;font-weight:bold">📥 DESCARGAR</a></div>'});h+='</div></div></div>';document.body.insertAdjacentHTML('beforeend',h)}
+        function ui(){const pn=rep.filter(function(x){return x.status==='pending'});const ap=rep.filter(function(x){return x.status==='approved'});document.getElementById('pc').textContent=pn.length;document.getElementById('pc2').textContent=pn.length;document.getElementById('ac').textContent=ap.length;document.getElementById('ac2').textContent=ap.length;document.getElementById('tc').textContent=rep.length;rend('pend',pn,'p');rend('appr',ap,'a')}
+        function rend(cid,list,typ){const c=document.getElementById(cid);if(!c)return;if(list.length===0){c.innerHTML='<div class="text-center py-12 text-gray-400"><p class="text-xl font-bold">📭 No hay novedades</p></div>';return}const byD={};list.forEach(function(r){if(!byD[r.date])byD[r.date]={};if(!byD[r.date][r.tech])byD[r.date][r.tech]=[];byD[r.date][r.tech].push(r)});const dates=Object.keys(byD).sort(function(a,b){return new Date(b)-new Date(a)});c.innerHTML='';dates.forEach(function(date){const techs=byD[date];let tot=0;Object.keys(techs).forEach(function(t){techs[t].sort(function(a,b){return a.order-b.order});tot+=techs[t].length});const db=document.createElement('div');db.className='mb-6';const dh=document.createElement('div');dh.className=typ==='p'?'bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-lg':'bg-gradient-to-r from-green-600 to-green-700 text-white p-4 rounded-t-lg';dh.innerHTML='<h3 class="text-xl font-bold">📅 '+fmt(date)+' <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm ml-2">'+tot+' novedad'+(tot!==1?'es':'')+'</span></h3>';db.appendChild(dh);const dc=document.createElement('div');dc.className=typ==='p'?'border-2 border-blue-600 rounded-b-lg p-4 bg-blue-50':'border-2 border-green-600 rounded-b-lg p-4 bg-green-50';Object.keys(techs).forEach(function(tech){const trs=techs[tech];const tb=document.createElement('div');tb.className='mb-4';const th=document.createElement('div');th.className=typ==='p'?'bg-blue-200 border-l-4 border-blue-800 p-3 mb-3 rounded':'bg-green-200 border-l-4 border-green-800 p-3 mb-3 rounded';th.innerHTML='<h4 class="font-bold '+(typ==='p'?'text-blue-900':'text-green-900')+'">👤 '+tech+' <span class="text-sm opacity-75">('+trs.length+' novedad'+(trs.length!==1?'es':'')+')</span></h4>';tb.appendChild(th);trs.forEach(function(r){const card=document.createElement('div');card.className=typ==='p'?'border-2 border-yellow-400 rounded-lg p-4 bg-yellow-50 mb-3 ml-4 shadow-sm':'border border-green-400 rounded-lg p-4 bg-white mb-3 ml-4 shadow-sm';const top=document.createElement('div');top.className='flex justify-between items-start mb-3';const inf=document.createElement('div');inf.innerHTML='<p class="text-sm font-bold text-gray-700 mb-1">📍 '+r.loc+'</p><span class="inline-block px-3 py-1 rounded-full text-sm font-bold '+(r.stat==='OPERATIVO'?'bg-green-100 text-green-800':'bg-red-100 text-red-800')+'">'+r.stat+'</span>';top.appendChild(inf);const btns=document.createElement('div');btns.className='flex gap-2';if(typ==='p'){const ab=document.createElement('button');ab.textContent='✅ APROBAR';ab.className='bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-700 shadow';ab.onclick=function(){app(r.id)};btns.appendChild(ab);const eb=document.createElement('button');eb.textContent='✏️';eb.className='bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 shadow';eb.onclick=function(){edit(r.id)};btns.appendChild(eb);const rb=document.createElement('button');rb.textContent='❌';rb.className='bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-red-700 shadow';rb.onclick=function(){del(r.id)};btns.appendChild(rb)}else{const db=document.createElement('button');db.textContent='🗑️';db.className='text-red-600 hover:text-red-800 font-bold text-xl';db.onclick=function(){del(r.id)};btns.appendChild(db)}top.appendChild(btns);card.appendChild(top);const cont=document.createElement('div');cont.className='bg-white p-3 rounded border-2 mt-3';cont.innerHTML='<p class="font-bold text-gray-800 text-sm mb-1">🔧 NOVEDAD:</p><p class="text-gray-700 mb-2">'+r.iss+'</p>';if(r.obs)cont.innerHTML+='<p class="font-bold text-gray-800 text-sm mb-1">💬 OBSERVACIONES:</p><p class="text-gray-600 text-sm mb-2">'+r.obs+'</p>';if(r.photos&&r.photos.length>0){if(typ==='p'){cont.innerHTML+='<p class="font-bold text-gray-800 text-sm mb-2">📷 FOTOS ('+r.photos.length+'):</p><div class="grid grid-cols-4 gap-2">';r.photos.forEach(function(p){cont.innerHTML+='<img src="'+p+'" class="w-full h-20 object-cover rounded border-2 cursor-pointer hover:border-blue-500" onclick="window.open(\''+p+'\',\'_blank\')">'});cont.innerHTML+='</div>'}else{cont.innerHTML+='<button onclick="viewPh('+r.id+')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold mt-2 hover:bg-blue-700">📷 VER '+r.photos.length+' FOTO(S)</button>'}}card.appendChild(cont);tb.appendChild(card)});dc.appendChild(tb)});db.appendChild(dc);c.appendChild(db)})}
+    </script>
+</body>
+</html>

@@ -145,7 +145,7 @@
   localStorage.setItem('r', JSON.stringify(rep));
 
   // 👇 Enviar TODAS las fotos a Google Sheets
-  fetch("TU_URL_WEB_APP", { // reemplaza con tu URL de Apps Script
+  fetch("https://script.google.com/macros/s/AKfycbwnLQZy_vk2JftbS820IkPhlpLyJEK9NLB9u2PH2QUXxKw5oqJjPdPbSiF6D1k9ZOYxTg/exec", { // reemplaza con tu URL de Apps Script
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

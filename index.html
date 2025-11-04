@@ -139,23 +139,34 @@
 
   localStorage.setItem('r', JSON.stringify(rep));
 
-  // 👇 Enviar datos a Google Sheets (ANTES de limpiar)
-  fetch("https://script.google.com/macros/s/AKfycbwnLQZy_vk2JftbS820IkPhlpLyJEK9NLB9u2PH2QUXxKw5oqJjPdPbSiF6D1k9ZOYxTg/exec", {
+ // 👇 Enviar datos a Google Sheets
+if(pht.length === 0){
+    alert('⚠️ Selecciona al menos una foto');
+    return;
+}
+
+// Por ahora solo enviaremos la primera foto (puedes extender luego a varias)
+const fotoBase64 = pht[0];
+
+fetch("TU_URL_WEB_APP", { // reemplaza con tu URL de Apps Script
     method: "POST",
-    mode: "no-cors",
     headers: {
-      "Content-Type": "application/json"
+        "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      tech: t,
-      date: d,
-      loc: l,
-      iss: i,
-      obs: o,
-      stat: s,
-      photo: pht.length > 0 ? pht[0] : ""
+        tech: t,
+        date: d,
+        loc: l,
+        iss: i,
+        obs: o,
+        stat: s,
+        photo: fotoBase64
     })
+}).then(res => res.text())
+  .then(resp => {
+      console.log("Enviado a Google Sheets", resp);
   });
+
 
   // 👇 Ahora sí limpiar los campos
   document.getElementById('loc').value = '';
